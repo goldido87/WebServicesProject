@@ -1,5 +1,5 @@
 var restify = require('restify');
-var server = restify.createServer({ name : "restifysample" });
+var server = restify.createServer({ name : "restifysample" , "Content-Type" : 'html'});
 
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/test');
@@ -73,6 +73,10 @@ db.once('open', function () {
 	 res.send(200, u2);
 	 return next();
 	 }
+	 else if (id==2){
+	 	res.send(200, shakira);
+		return next();
+	 }
 	}
 
 	function findSongs(req,res,next)
@@ -84,6 +88,7 @@ db.once('open', function () {
 
 	 //...
 	 res.send(200, {'id':1,'name':'danidin','average':98});
+	 res.end(200, 'index.html');
 	 return next();
 	}
 
