@@ -35,7 +35,7 @@ router.use(function(req, res, next) {
 // ----------------------------------------------------
 router.route('/songs')
 
-	// create a song (accessed at POST http://localhost:8080/api/songs)
+	// create a song (accessed at POST http://localhost:8080/songs)
 	.post(function(req, res) {
 		
 		var song = new Song();				// create a new instance of the Song model
@@ -54,9 +54,9 @@ router.route('/songs')
 		
 	})
 
-	// get all the songs (accessed at GET http://localhost:8080/api/songs)
+	// get all the songs (accessed at GET http://localhost:8080/songs)
 	.get(function(req, res) {
-		Song.find(function(err, songs) {
+		Song.find().sort({"likes" : -1}).execFind(function(err, songs) {
 			if (err)
 				res.send(err);
 
@@ -77,7 +77,7 @@ router.route('/songs/:song_id')
 		});
 	})
 
-	// update the song with this id (accessed at PUT http://localhost:8080/api/songs/:song_id)
+	// update the song with this id (accessed at PUT http://localhost:8080/songs/:song_id)
 	.put(function(req, res) {
 
 		// use our song model to find the song we want
@@ -102,7 +102,7 @@ router.route('/songs/:song_id')
 		});
 	})
 
-	// delete the song with this id (accessed at DELETE http://localhost:8080/api/songs/:song_id)
+	// delete the song with this id (accessed at DELETE http://localhost:8080/songs/:song_id)
 	.delete(function(req, res) {
 		Song.remove({
 			_id: req.params.song_id
