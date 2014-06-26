@@ -10,16 +10,16 @@
 
 
     <h1>Welcome to Music Player</h1>
+
+    <div class="searchClips">
+      <input class="searchClipsText" type="text" placeholder="Search a song to add..."></input>
+      <button class="searchClipsBtn">Search</button>
+    </div>
+
+    <div class="songsContainer"></div>
     
 
-   <script>
-	   $.ajax({
-		  url: "/songs",
-		  type: "GET"
-		}).done(function(data) {
-		  console.log(data);
-		});
-   </script>
+   <script src="js/index.js"></script>
 
     
   </body>
