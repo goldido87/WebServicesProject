@@ -8,6 +8,7 @@ var express    = require('express');		// call express
 var app        = express();					// define our app using express
 var bodyParser = require('body-parser');
 var mongoose   = require('mongoose');
+var fs = require('fs');
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -114,7 +115,11 @@ router.route('/songs/:song_id')
 
 // test route to make sure everything is working (accessed at GET http://localhost:8080/api)
 router.get('/', function(req, res) {
-	res.json({ message: 'hooray! welcome to our api!' });
+	    fs.readFile('index.html', function(err, page) {
+        res.writeHead(200, {'Content-Type': 'text/html'});
+        res.write(page);
+        res.end();
+    });
 });
 
 // more routes for our API will happen here
