@@ -38,10 +38,11 @@ router.route('/songs')
 	// create a song (accessed at POST http://localhost:8080/api/songs)
 	.post(function(req, res) {
 		
-		var song = new Song();			// create a new instance of the Song model
-		song.author = req.body.author;  // set the songs author (comes from the request)
-		song.title = req.body.title;	// set the songs title (comes from the request)
-		song.likes = req.body.likes;	// set the songs likes (comes from the request)
+		var song = new Song();				// create a new instance of the Song model
+		song.author = req.body.author;		// set the songs author (comes from the request)
+		song.title = req.body.title;		// set the songs title (comes from the request)
+		song.embedUrl = req.body.embedUrl;	// set the songs embedUrl (comes from the request)
+		song.likes = req.body.likes;		// set the songs likes (comes from the request)
 
 		// save the song and check for errors
 		song.save(function(err) {
@@ -85,9 +86,10 @@ router.route('/songs/:song_id')
 			if (err)
 				res.send(err);
 
-			song.author = req.body.author;	// update the songs info
-			song.title = req.body.title;	// update the songs info
-			song.likes = req.body.likes;	// update the songs info
+			song.author = req.body.author;		// update the songs info
+			song.title = req.body.title;		// update the songs info
+			song.embedUrl = req.body.embedUrl;	// update the songs info
+			song.likes = req.body.likes;		// update the songs info
 
 			// save the song
 			song.save(function(err) {

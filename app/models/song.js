@@ -6,6 +6,7 @@ var Schema       = mongoose.Schema;
 var SongSchema   = new Schema({
 	author : String,
 	title: String,
+	embedUrl: String,
 	likes: 0,
 });
 
