@@ -1,0 +1,26 @@
+.songsContainer {
+	position: relative;
+	margin-top: 20px;
+}
+
+.songRow {
+	position: relative;
+}
+
+.songRow .songIframe {
+	width: 150px;
+	height: 150px;
+}
+
+.songRow .likeImg {
+	width: 50px;
+	cursor: pointer;
+}
+
+.songRow .likes {
+	position: absolute;
+	bottom: 12px;
+	margin-left: -32px;
+	color: rgb(40, 123, 228);
+	cursor: pointer;
+}
