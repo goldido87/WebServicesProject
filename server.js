@@ -37,12 +37,12 @@ router.route('/songs')
 
 	// create a song (accessed at POST http://localhost:8080/songs)
 	.post(function(req, res) {
-		
+
 		var song = new Song();				// create a new instance of the Song model
 		song.author = req.body.author;		// set the songs author (comes from the request)
 		song.title = req.body.title;		// set the songs title (comes from the request)
 		song.embedUrl = req.body.embedUrl;	// set the songs embedUrl (comes from the request)
-		song.likes = req.body.likes;		// set the songs likes (comes from the request)
+		song.likes = parseInt(req.body.likes);		// set the songs likes (comes from the request)
 
 		// save the song and check for errors
 		song.save(function(err) {
@@ -56,7 +56,7 @@ router.route('/songs')
 
 	// get all the songs (accessed at GET http://localhost:8080/songs)
 	.get(function(req, res) {
-		Song.find().sort({"likes" : -1}).execFind(function(err, songs) {
+		Song.find().sort('field -likes').execFind(function(err, songs) {
 			if (err)
 				res.send(err);
 
@@ -86,17 +86,17 @@ router.route('/songs/:song_id')
 			if (err)
 				res.send(err);
 
-			song.author = req.body.author;		// update the songs info
-			song.title = req.body.title;		// update the songs info
-			song.embedUrl = req.body.embedUrl;	// update the songs info
-			song.likes = req.body.likes;		// update the songs info
+			 song.author = req.body.author;		// update the songs info
+			 song.title = req.body.title;		// update the songs info
+			 song.embedUrl = req.body.embedUrl;	// update the songs info
+			 song.likes = req.body.likes;
 
 			// save the song
 			song.save(function(err) {
 				if (err)
 					res.send(err);
 
-				res.json({ message: 'Song updated!' });
+				res.json({ id : req.params.song_id,  msg : "Updated"});
 			});
 
 		});
@@ -115,6 +115,31 @@ router.route('/songs/:song_id')
 	});
 
 // more routes for our API will happen here
+
+
+// on routes that end in /songs/likes/:song_id
+// ----------------------------------------------------
+router.route('/songs/likes/:song_id')
+	.put(function(req, res) {
+
+		// use our song model to find the song we want
+		Song.findById(req.params.song_id, function(err, song) {
+
+			if (err)
+				res.send(err);
+
+			song.likes++;	// update the songs info
+
+			// save the song
+			song.save(function(err) {
+				if (err)
+					res.send(err);
+
+				res.json({ newLikesCount: song.likes });
+			});
+
+		});
+	})
 
 // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api

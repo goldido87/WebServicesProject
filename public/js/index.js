@@ -2,7 +2,6 @@ var YouTubeAPIKey = 'AIzaSyDoNhvgqnNXC9ushmSmrP3tFvRq39YqWVQ';
 var YouTubeEmbedURL = "http://www.youtube.com/embed/";
 
 
-
 $(document).ready(function() {
 	
 	init();
@@ -42,6 +41,8 @@ $(document).ready(function() {
 			
 		}).done(function(data) 
 		{
+			//add markup to HTML
+			appendMarkupToHTML(data.embedUrl, 0 , data._id);
 			console.log("json post OK");
 
 		}).error(function(err) {
@@ -52,21 +53,36 @@ $(document).ready(function() {
 
 	function getYouTubeClips(data)
 	{	
-		// var sorted = data.sort(function (a, b) {
-		//     return a.likes < b.likes ? -1 : 1;
-		// });
-
-		// console.log(sorted);
-
 		$.each(data,function(index,obj) {
-			appendMarkupToHTML(obj.embedUrl, obj.likes);
+			appendMarkupToHTML(obj.embedUrl, obj.likes, obj._id);
 
+		});
+
+		$(".likeImg").click(function()
+		 {
+		 	var mongoID = $(this).parent().attr("id");
+			var elem = $(this).next();
+			console.log(mongoID);
+			addLike(mongoID, elem); 
 		});
 	}
 
-	function addLike() 
+	function addLike(mongoID, elem) 
 	{
+		$.ajax({
+			url: "/songs/likes/" + mongoID,
+			type: "PUT",
+			//data to post to server
+			data: mongoID
+			
+		}).done(function(data) 
+		{
+			console.log(data.newLikesCount);
+			elem.text(data.newLikesCount);
 
+		}).error(function(err) {
+			console.log(err);
+		});
 	}
 
 	function deleteASong()
@@ -98,24 +114,18 @@ $(document).ready(function() {
 			//do AJAX Call to REST
 			insertSongToDB(jsonToPost);
 
-			//add markup to HTML
-			appendMarkupToHTML(videoID);
-		
-
 		})
 		.error(function(err) {
 			console.log(err);
 		});
 	}
 
-	function appendMarkupToHTML(videoID, likes)
+	function appendMarkupToHTML(videoID, likes, objectID)
 	{
-		if (likes === undefined) likes = 0;
-
-		var markupToAppend = "<div class='songRow'>"
+		var markupToAppend = "<div class='songRow' id=" + objectID + ">"
 		markupToAppend += "<iframe class='songIframe' src=" + YouTubeEmbedURL + videoID + "></iframe>'";
 		markupToAppend += "<img class='likeImg' src='img/like.png'/>";
-		markupToAppend += "<span class='likes'>" + likes + "</span></div>";
+		markupToAppend += "<span class='likes'>" + likes + "</div>";
 
 		$( ".songsContainer" ).append(markupToAppend);	
 	}
