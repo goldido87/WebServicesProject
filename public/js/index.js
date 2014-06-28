@@ -26,7 +26,7 @@ $(document).ready(function() {
 	function registerEvents() {
 
 		$(".searchClipsBtn").click(function() {
-			addASong($(".searchClipsText").val());
+			searchASongFromYoutube($(".searchClipsText").val());
 		});
 
 	}
@@ -43,10 +43,10 @@ $(document).ready(function() {
 		{
 			//add markup to HTML
 			appendMarkupToHTML(data.embedUrl, 0 , data._id);
-			console.log("json post OK");
+			console.log(data.message);
 
 		}).error(function(err) {
-			console.log("json post Fail");
+			console.log(err);
 		});
 	}
 
@@ -65,15 +65,24 @@ $(document).ready(function() {
 			console.log(mongoID);
 			addLike(mongoID, elem); 
 		});
+
+		$(".deleteImg").click(function()
+		 {
+		 	var mongoID = $(this).parent().attr("id");
+			var elem = $(this).parent();
+			console.log(mongoID);
+			deleteASong(mongoID, elem); 
+		});
 	}
 
+
+	///ACTIONS///
 	function addLike(mongoID, elem) 
 	{
 		$.ajax({
 			url: "/songs/likes/" + mongoID,
-			type: "PUT",
+			type: "PUT"
 			//data to post to server
-			data: mongoID
 			
 		}).done(function(data) 
 		{
@@ -85,12 +94,24 @@ $(document).ready(function() {
 		});
 	}
 
-	function deleteASong()
+	function deleteASong(mongoID, elem)
 	{
-		
+		$.ajax({
+			url: "/songs/" + mongoID,
+			type: "DELETE"
+			//data to post to server
+			
+		}).done(function(data) 
+		{
+			console.log(data.message);
+			elem.remove();
+
+		}).error(function(err) {
+			console.log(err);
+		});
 	}
 
-	function addASong(song) {
+	function searchASongFromYoutube(song) {
 		
 		var YouTubeAPIURL = 'https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&q='+ song +'&key=' + YouTubeAPIKey;
 		$.ajax({
@@ -120,10 +141,12 @@ $(document).ready(function() {
 		});
 	}
 
+
 	function appendMarkupToHTML(videoID, likes, objectID)
 	{
 		var markupToAppend = "<div class='songRow' id=" + objectID + ">"
 		markupToAppend += "<iframe class='songIframe' src=" + YouTubeEmbedURL + videoID + "></iframe>'";
+		markupToAppend += "<img class='deleteImg' src='img/delete.png'/>";
 		markupToAppend += "<img class='likeImg' src='img/like.png'/>";
 		markupToAppend += "<span class='likes'>" + likes + "</div>";
 

@@ -38,21 +38,21 @@ router.route('/songs')
 	// create a song (accessed at POST http://localhost:8080/songs)
 	.post(function(req, res) {
 
-		var song = new Song();				// create a new instance of the Song model
-		song.author = req.body.author;		// set the songs author (comes from the request)
-		song.title = req.body.title;		// set the songs title (comes from the request)
-		song.embedUrl = req.body.embedUrl;	// set the songs embedUrl (comes from the request)
-		song.likes = parseInt(req.body.likes);		// set the songs likes (comes from the request)
+			var songToInsert = new Song();				// create a new instance of the Song model
+			songToInsert.author = req.body.author;		// set the songs author (comes from the request)
+			songToInsert.title = req.body.title;		// set the songs title (comes from the request)
+			songToInsert.embedUrl = req.body.embedUrl;	// set the songs embedUrl (comes from the request)
+			songToInsert.likes = parseInt(req.body.likes);		// set the songs likes (comes from the request)
+			
+			// save the song and check for errors
+			songToInsert.save(function(err) {
+				if (err)
+					res.send(405,err);
 
-		// save the song and check for errors
-		song.save(function(err) {
-			if (err)
-				res.send(err);
+				res.json({ code: 0, message: 'Song created!' });
+			});
 
-			res.json({ message: 'Song created!' });
-		});
-		
-	})
+		})
 
 	// get all the songs (accessed at GET http://localhost:8080/songs)
 	.get(function(req, res) {
