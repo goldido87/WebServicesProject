@@ -152,7 +152,9 @@ router.route('/songs/category/:category')
 	});
 
 
-// on routes that end in /
+// on routes that end in //search/songs/:category? (optional param)
+//e.g: http://localhost:8080/search/songs/?likesCondition=gte&likes=11
+// e.g 2: http://localhost:8080/search/songs/rock?likesCondition=gte&likes=11
 // ----------------------------------------------------
 router.route('/search/songs/:category?')
 	.get(function(req, res) {
@@ -187,6 +189,8 @@ router.route('/search/songs/:category?')
 
 			else
 			{
+				condition = condition.toLowerCase();
+				
 				if(condition == 'gte')
 					Song.find().where('category',category).where('likes').gte(numOfLikes).sort('field -likes').execFind(function(err, songs) {
 				
