@@ -20,7 +20,6 @@
 .songRow .deleteImg {
 	width: 30px;
 	cursor: pointer;
-	position: absolute;
 }
 
 .songRow .likes {

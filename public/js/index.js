@@ -230,11 +230,11 @@ $(document).ready(function() {
 	///html helper func
 	function appendMarkupToHTML(videoID, likes, objectID)
 	{
-		var markupToAppend = "<div class='songRow' id=" + objectID + ">"
+		var markupToAppend = "<td><div class='songRow' id=" + objectID + ">"
 		markupToAppend += "<iframe class='songIframe' src=" + YouTubeEmbedURL + videoID + "></iframe>'";
 		markupToAppend += "<img class='deleteImg' src='img/delete.png'/>";
 		markupToAppend += "<img class='likeImg' src='img/like.png'/>";
-		markupToAppend += "<span class='likes'>" + likes + "</div>";
+		markupToAppend += "<span class='likes'>" + likes + "</div></td>";
 
 		$( ".songsContainer" ).append(markupToAppend);	
 	}
