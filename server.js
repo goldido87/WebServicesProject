@@ -14,9 +14,10 @@ var fs = require('fs');
 // this will let us get the data from a POST
 app.use(bodyParser());
 
-var port = process.env.PORT || 8080;		// set our port
-
-mongoose.connect('mongodb://sge:sge123654@ds037827.mongolab.com:37827/musicplayer'); // connect to our database
+// set our port
+var port = process.env.PORT || 8080;
+// connect to our database
+mongoose.connect('mongodb://sge:sge123654@ds037827.mongolab.com:37827/musicplayer'); 
 
 var Song = require('./app/models/song');
 
@@ -43,13 +44,15 @@ router.route('/songs')
 			songToInsert.title = req.body.title;		// set the songs title (comes from the request)
 			songToInsert.embedUrl = req.body.embedUrl;	// set the songs embedUrl (comes from the request)
 			songToInsert.likes = parseInt(req.body.likes);		// set the songs likes (comes from the request)
+			songToInsert.viewCount = parseInt(req.body.viewCount);
+			songToInsert.category = req.body.category.toLowerCase();
 			
 			// save the song and check for errors
 			songToInsert.save(function(err) {
 				if (err)
 					res.send(405,err);
 
-				res.json({ code: 0, message: 'Song created!' });
+				res.json(songToInsert);
 			});
 
 		})
@@ -86,17 +89,14 @@ router.route('/songs/:song_id')
 			if (err)
 				res.send(err);
 
-			 song.author = req.body.author;		// update the songs info
-			 song.title = req.body.title;		// update the songs info
-			 song.embedUrl = req.body.embedUrl;	// update the songs info
-			 song.likes = req.body.likes;
+			 song.viewCount = parseInt(req.body.viewCount);
 
 			// save the song
 			song.save(function(err) {
 				if (err)
 					res.send(err);
 
-				res.json({ id : req.params.song_id,  msg : "Updated"});
+				res.json({ id : req.params.song_id,  msg : "Updated", views: song.viewCount});
 			});
 
 		});
@@ -114,12 +114,9 @@ router.route('/songs/:song_id')
 		});
 	});
 
-// more routes for our API will happen here
-
-
 // on routes that end in /songs/likes/:song_id
-// ----------------------------------------------------
 router.route('/songs/likes/:song_id')
+// UPDATE Likes of song
 	.put(function(req, res) {
 
 		// use our song model to find the song we want
@@ -135,14 +132,84 @@ router.route('/songs/likes/:song_id')
 				if (err)
 					res.send(err);
 
-				res.json({ newLikesCount: song.likes });
+				res.json({ newLikesCount: song.likes , id: song.embedUrl });
 			});
 
 		});
 	})
 
+// on routes that end in /songs/category/:categoryId
+// ----------------------------------------------------
+router.route('/songs/category/:category')
+	.get(function(req, res)
+	 {
+		Song.find().where('category', req.params.category.toLowerCase()).sort('field -likes').execFind(function(err, songs) {
+			if (err)
+				res.send(err);
+
+			res.json(songs);
+		});
+	});
+
+
+// on routes that end in /
+// ----------------------------------------------------
+router.route('/search/songs/:category?')
+	.get(function(req, res) {
+			console.log(req.query['likesCondition']);
+			console.log(req.query['likes']);
+			console.log(req.params.category);
+			
+			var condition = req.query['likesCondition'].toLowerCase();
+			var numOfLikes = req.query['likes'];
+			var category = req.params.category;
+
+			if(category == undefined)
+			{	
+				if(condition == 'gte')
+					Song.find().where('likes').gte(numOfLikes).sort('field -likes').execFind(function(err, songs) {
+				
+					if (err)
+						res.send(err);
+
+					res.json(songs);
+				});
+
+				else if(condition == 'lte')
+					Song.find().where('likes').lte(numOfLikes).sort('field -likes').execFind(function(err, songs) {
+				
+					if (err)
+						res.send(err);
+
+					res.json(songs);
+				});
+			}
+
+			else
+			{
+				if(condition == 'gte')
+					Song.find().where('category',category).where('likes').gte(numOfLikes).sort('field -likes').execFind(function(err, songs) {
+				
+					if (err)
+						res.send(err);
+
+					res.json(songs);
+				});
+
+				else if(condition == 'lte')
+					Song.find().where('likes').where('category',category).lte(numOfLikes).sort('field -likes').execFind(function(err, songs) {
+				
+					if (err)
+						res.send(err);
+
+					res.json(songs);
+				});
+			}
+
+
+		});
+
 // REGISTER OUR ROUTES -------------------------------
-// all of our routes will be prefixed with /api
 app.use('/', router);
 app.use('/', express.static(__dirname + '/public'));
 

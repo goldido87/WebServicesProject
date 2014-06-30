@@ -31,26 +31,9 @@ $(document).ready(function() {
 
 	}
 
-	function insertSongToDB(jsonToPost)
-	{
-		$.ajax({
-			url: "/songs",
-			type: "POST",
-			//data to post to server
-			data: jsonToPost
-			
-		}).done(function(data) 
-		{
-			//add markup to HTML
-			appendMarkupToHTML(data.embedUrl, 0 , data._id);
-			console.log(data.message);
-
-		}).error(function(err) {
-			console.log(err);
-		});
-	}
 
 
+	///AJAX ACTIONS///
 	function getYouTubeClips(data)
 	{	
 		$.each(data,function(index,obj) {
@@ -76,7 +59,26 @@ $(document).ready(function() {
 	}
 
 
-	///ACTIONS///
+	function insertSongToDB(jsonToPost)
+	{
+		$.ajax({
+			url: "/songs",
+			type: "POST",
+			//data to post to server
+			data: jsonToPost
+			
+		}).done(function(data) 
+		{
+			getStatisticInfoFromYoutube(data.embedUrl,data._id);
+			//add markup to HTML
+			appendMarkupToHTML(data.embedUrl, 0 , data._id);
+			console.log(data);
+	
+		}).error(function(err) {
+			console.log(err);
+		});
+	}
+
 	function addLike(mongoID, elem) 
 	{
 		$.ajax({
@@ -111,27 +113,73 @@ $(document).ready(function() {
 		});
 	}
 
-	function searchASongFromYoutube(song) {
-		
-		var YouTubeAPIURL = 'https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&q='+ song +'&key=' + YouTubeAPIKey;
-		$.ajax({
+
+
+	function getStatisticInfoFromYoutube(songYoutubeID, mongoID)
+	{
+		var YouTubeAPIURL = 'https://www.googleapis.com/youtube/v3/videos?part=statistics&id=' + songYoutubeID + '&key=' + YouTubeAPIKey;
+			$.ajax({
 			url: YouTubeAPIURL,
 			type: "GET"
 			
 		})
 		.done(function(data) 
 		{	
+			var jsonToPut = new Object();
+			//define items of the relavant data for us
+			jsonToPut.viewCount  = data.items[0].statistics.viewCount;
+			//do AJAX Call to REST
+			addStatisticInfoFromYoutube(jsonToPut, mongoID);
+
+		})
+		.error(function(err) {
+			console.log(err);
+		});
+
+	}
+
+	function addStatisticInfoFromYoutube(jsonToPut,mongoID)
+	{
+		console.log(jsonToPut);
+		$.ajax({
+			url: "/songs/" + mongoID,
+			type: "PUT",
+			//data to post to server
+			data: jsonToPut
+			
+		}).done(function(data) 
+		{
+			console.log("PUT: " + data);
+			
+
+		}).error(function(err) {
+			console.log(err);
+		});
+	}
+
+	function searchASongFromYoutube(song) {
+		
+		var YouTubeAPIURL = 'https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=1&q='+ song +'&key=' + YouTubeAPIKey;
+			$.ajax({
+			url: YouTubeAPIURL,
+			type: "GET"
+			
+		})
+		.done(function(data) 
+		{	
+			var category = $("#categoryDropdown").val() //the value of the selected option
 			var jsonToPost = new Object();
 			//define items of the relavant data for us
-			var relavantData = data.items[0];
-			//video id of YouTube
-			var videoID = relavantData.id.videoId;
+			var relavantData = data.items[0].snippet;
 
 			//JSON to post to REST API
-			jsonToPost.author = relavantData.snippet.title;
-			jsonToPost.title = relavantData.snippet.title;
-			jsonToPost.embedUrl = videoID;
+			jsonToPost.author = relavantData.title;
+			jsonToPost.title = relavantData.title;
+			//video id of YouTube
+			jsonToPost.embedUrl = data.items[0].id.videoId;
 			jsonToPost.likes = 0;
+			jsonToPost.viewCount = 0.0;
+			jsonToPost.category = category;
 			//do AJAX Call to REST
 			insertSongToDB(jsonToPost);
 
@@ -142,6 +190,44 @@ $(document).ready(function() {
 	}
 
 
+
+	function sortListByCategory(categoryValue)
+	{
+		$.ajax({
+			url: '/songs/category/' + categoryValue,
+			type: "GET"
+			
+		})
+		.done(function(data) 
+		{	
+			getYouTubeClips(data);
+		})
+
+		.error(function(err) {
+			console.log(err);
+		});
+
+	}
+
+	function sortListByNumberOfLikes(categoryValue, condition)
+	{
+		$.ajax({
+			url: '/songs/likes/Rock&10000',
+			type: "GET"
+			
+		})
+		.done(function(data) 
+		{	
+			
+		})
+		
+		.error(function(err) {
+			console.log(err);
+		});
+
+	}
+
+	///html helper func
 	function appendMarkupToHTML(videoID, likes, objectID)
 	{
 		var markupToAppend = "<div class='songRow' id=" + objectID + ">"

@@ -6,8 +6,10 @@ var Schema       = mongoose.Schema;
 var SongSchema   = new Schema({
 	author : String,
 	title: String,
-	embedUrl: String,
-	likes: 0,
+	viewCount: Number,
+	embedUrl: { type:String, unique: true },
+	likes: Number,
+	category: String,
 });
 
 module.exports = mongoose.model('Song', SongSchema);
