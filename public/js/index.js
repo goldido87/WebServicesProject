@@ -41,6 +41,11 @@ $(document).ready(function() {
 
 		});
 
+		registerClipEvents();
+	}
+
+	function registerClipEvents()
+	{
 		$(".likeImg").click(function()
 		 {
 		 	var mongoID = $(this).parent().attr("id");
@@ -58,7 +63,6 @@ $(document).ready(function() {
 		});
 	}
 
-
 	function insertSongToDB(jsonToPost)
 	{
 		$.ajax({
@@ -72,6 +76,7 @@ $(document).ready(function() {
 			getStatisticInfoFromYoutube(data.embedUrl,data._id);
 			//add markup to HTML
 			appendMarkupToHTML(data.embedUrl, 0 , data._id);
+			registerClipEvents();
 			console.log(data);
 	
 		}).error(function(err) {
@@ -177,8 +182,6 @@ $(document).ready(function() {
 			jsonToPost.title = relavantData.title;
 			//video id of YouTube
 			jsonToPost.embedUrl = data.items[0].id.videoId;
-			jsonToPost.likes = 0;
-			jsonToPost.viewCount = 0.0;
 			jsonToPost.category = category;
 			//do AJAX Call to REST
 			insertSongToDB(jsonToPost);
