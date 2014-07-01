@@ -39,7 +39,6 @@ router.route('/songs')
 	// create a song (accessed at POST http://localhost:8080/songs)
 	.post(function(req, res) {
 
-			console.log("songs2");
 			var songToInsert = new Song();				// create a new instance of the Song model
 			songToInsert.author = req.body.author;		// set the songs author (comes from the request)
 			songToInsert.title = req.body.title;		// set the songs title (comes from the request)
@@ -49,7 +48,7 @@ router.route('/songs')
 			// save the song and check for errors
 			songToInsert.save(function(err) {
 				if (err)
-					res.send(405,err);
+					res.send(500, { code : -1, msg: "Couldn't post song"});
 
 				res.json(songToInsert);
 			});
@@ -60,7 +59,7 @@ router.route('/songs')
 	.get(function(req, res) {
 		Song.find().sort('field -likes').execFind(function(err, songs) {
 			if (err)
-				res.send(err);
+				res.send(404,{ code : -1, msg: "Couldn't get songs list"});
 
 			res.json(songs);
 		});
@@ -72,10 +71,9 @@ router.route('/songs/:song_id?')
 
 	// get the song with that id (accessed at GET http://localhost:8080/api/songs/:song_id)
 	.get(function(req, res, next) {
-		console.log("songs1");
 		Song.findById(req.params.song_id, function(err, song) {
 		 if (err)
-				res.send(err);
+				res.send(404,{ code: -1, msg: 'No Such Song ID'});
 
 			res.json(song);
 		});
@@ -95,7 +93,7 @@ router.route('/songs/:song_id?')
 			// save the song
 			song.save(function(err) {
 				if (err)
-					res.send(err);
+					res.send(405,{ code : -1, msg: "Couldn't update song request"});
 
 				res.json({ id : req.params.song_id,  msg : "Updated", views: song.viewCount});
 			});
@@ -109,7 +107,7 @@ router.route('/songs/:song_id?')
 			_id: req.params.song_id
 		}, function(err, song) {
 			if (err)
-				res.send(err);
+				res.send(405,{ code : -1, msg: "Couldn't submit delete request"});
 
 			res.json({ message: 'Successfully deleted' });
 		});
@@ -124,14 +122,14 @@ router.route('/songs/likes/:song_id')
 		Song.findById(req.params.song_id, function(err, song) {
 
 			if (err)
-				res.send(err);
+				res.send(404,{ code : -1, msg: "Internal faliure"});
 
 			song.likes++;	// update the songs likes
 
 			// save the song
 			song.save(function(err) {
 				if (err)
-					res.send(err);
+					res.send(405, { code : -1, msg: "Couldn't submit like request"});
 
 				res.json({ newLikesCount: song.likes , id: song.embedUrl });
 			});
@@ -140,39 +138,37 @@ router.route('/songs/likes/:song_id')
 	})
 
 // on routes that end in //search/songs/:category? (optional param)
-//e.g: http://localhost:8080/search/songs?likesCondition=gte&likes=11
-// e.g 2: http://localhost:8080/search/songs/rock?likesCondition=gte&likes=11
+//e.g: http://localhost:8080/search/songs?likesCondition=gt&likes=11
+// e.g 2: http://localhost:8080/search/songs/rock?likesCondition=gt&likes=11
 // ----------------------------------------------------
 router.route('/songs/category/:category?')
 	.get(function(req, res) 
-	{
-		console.log("search");
-			console.log(req.query['likesCondition']);
-			console.log(req.query['likes']);
-			console.log(req.query['popCondition']);
-			console.log(req.query['popularity'])
-			console.log(req.params.category);
-				
+	{	
+			var songs;
 			var category = req.params.category;
 			var likes = req.query['likes'];
 			var popularity = req.query['popularity'];	
-			var songs;
+			
+			//conditions, lt || gt || default: equals
+			var likesCondition = req.query['likesCondition'];
+			var popCondition = req.query['popCondition'];
 
 			if(category == undefined)
 			{
-				 songs = myFunction('all', likes, req.query['likesCondition'], popularity, req.query['popCondition']);			 
+				 songs = sortByCondition('all', likes, likesCondition, popularity, popCondition);			 
 			}
 
 
 			else
 			{
-				 songs = myFunction(category, likes, req.query['likesCondition'], popularity, req.query['popCondition']);
+				 category = category.toLowerCase();
+				 songs = sortByCondition(category, likes, likesCondition, popularity, popCondition);
 				 songs.where('category', category);
 			}
 
 		  	songs.sort('field -likes').execFind(function(err, songsJSON) {
 						if (err)
-							res.send(err);
+							res.send(405,{code: -1, msg: "Couldn't make sort, check queries"});
 
 							res.json(songsJSON);
 						});
@@ -181,17 +177,17 @@ router.route('/songs/category/:category?')
 	});
 
 
-	function myFunction(category, likes, likesCondition, popularity,popCondition)
+	function sortByCondition(category, likes, likesCondition, popularity,popCondition)
 	{
  		var finalSongList = Song.find();
 		if(likes != undefined)
 		{
 			var likesCondition = likesCondition || 'equals';
 
-				if(likesCondition == 'gte')
-					finalSongList.where('likes').gte(likes);							
-				else if(likesCondition == 'lte')
-					finalSongList.where('likes').lte(likes);
+				if(likesCondition == 'gt')
+					finalSongList.where('likes').gt(likes);							
+				else if(likesCondition == 'lt')
+					finalSongList.where('likes').lt(likes);
 				else if(likesCondition == 'equals')
 					finalSongList.where('likes').equals(likes);
 		}
@@ -200,10 +196,10 @@ router.route('/songs/category/:category?')
 		{
 			var popCondition = popCondition || 'equals';
 
-				if(popCondition == 'gte')
-					finalSongList.where('viewCount').gte(popularity);	
-				else if(popCondition == 'lte')
-					finalSongList.where('viewCount').lte(popularity);
+				if(popCondition == 'gt')
+					finalSongList.where('viewCount').gt(popularity);	
+				else if(popCondition == 'lt')
+					finalSongList.where('viewCount').lt(popularity);
 				else if(popCondition == 'equals')
 					finalSongList.where('viewCount').equals(popularity);
 		}

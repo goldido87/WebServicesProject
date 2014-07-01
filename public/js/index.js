@@ -20,6 +20,7 @@ $(document).ready(function() {
 
 		}).error(function(err) {
 			console.log(err);
+			alert('something went wrong with fetching data from DB');
 		});
 	}
 
@@ -81,6 +82,7 @@ $(document).ready(function() {
 	
 		}).error(function(err) {
 			console.log(err);
+			alert("Song already exists");
 		});
 	}
 
@@ -189,45 +191,8 @@ $(document).ready(function() {
 		})
 		.error(function(err) {
 			console.log(err);
+			alert("Something went wrong with the query");
 		});
-	}
-
-
-
-	function sortListByCategory(categoryValue)
-	{
-		$.ajax({
-			url: '/songs/category/' + categoryValue,
-			type: "GET"
-			
-		})
-		.done(function(data) 
-		{	
-			getYouTubeClips(data);
-		})
-
-		.error(function(err) {
-			console.log(err);
-		});
-
-	}
-
-	function sortListByNumberOfLikes(categoryValue, condition)
-	{
-		$.ajax({
-			url: '/songs/likes/Rock&10000',
-			type: "GET"
-			
-		})
-		.done(function(data) 
-		{	
-			
-		})
-		
-		.error(function(err) {
-			console.log(err);
-		});
-
 	}
 
 	///html helper func
