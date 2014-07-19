@@ -174,7 +174,7 @@ $(document).ready(function() {
 		})
 		.done(function(data) 
 		{	
-			var category = $("#categoryDropdown").val() //the value of the selected option
+			var category = $("#categoryDropdown").val(); //the value of the selected option
 			var jsonToPost = new Object();
 			//define items of the relavant data for us
 			var relavantData = data.items[0].snippet;

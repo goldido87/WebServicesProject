@@ -72,7 +72,7 @@ router.route('/songs/:song_id?')
 	// get the song with that id (accessed at GET http://localhost:8080/api/songs/:song_id)
 	.get(function(req, res, next) {
 		Song.findById(req.params.song_id, function(err, song) {
-		 if (err)
+		if (err)
 				res.send(404,{ code: -1, msg: 'No Such Song ID'});
 
 			res.json(song);
@@ -88,7 +88,7 @@ router.route('/songs/:song_id?')
 			if (err)
 				res.send(err);
 
-			 song.viewCount = parseInt(req.body.viewCount);
+			song.viewCount = parseInt(req.body.viewCount);
 
 			// save the song
 			song.save(function(err) {
@@ -137,9 +137,9 @@ router.route('/songs/likes/:song_id')
 		});
 	})
 
-// on routes that end in //search/songs/:category? (optional param)
-//e.g: http://localhost:8080/search/songs?likesCondition=gt&likes=11
-// e.g 2: http://localhost:8080/search/songs/rock?likesCondition=gt&likes=11
+// on routes that end in //songs/:category? (optional param)
+//e.g: http://localhost:8080/songs?likesCondition=gt&likes=11
+// e.g 2: http://localhost:8080/songs/rock?likesCondition=gt&likes=11
 // ----------------------------------------------------
 router.route('/songs/category/:category?')
 	.get(function(req, res) 
@@ -155,15 +155,13 @@ router.route('/songs/category/:category?')
 
 			if(category == undefined)
 			{
-				 songs = sortByCondition('all', likes, likesCondition, popularity, popCondition);			 
+				songs = sortByCondition('all', likes, likesCondition, popularity, popCondition);			 
 			}
-
-
 			else
 			{
-				 category = category.toLowerCase();
-				 songs = sortByCondition(category, likes, likesCondition, popularity, popCondition);
-				 songs.where('category', category);
+				category = category.toLowerCase();
+				songs = sortByCondition(category, likes, likesCondition, popularity, popCondition);
+				songs.where('category', category);
 			}
 
 		  	songs.sort('field -likes').execFind(function(err, songsJSON) {
@@ -180,27 +178,27 @@ router.route('/songs/category/:category?')
 	function sortByCondition(category, likes, likesCondition, popularity,popCondition)
 	{
  		var finalSongList = Song.find();
-		if(likes != undefined)
+		if (likes != undefined)
 		{
 			var likesCondition = likesCondition || 'equals';
 
-				if(likesCondition == 'gt')
+				if (likesCondition == 'gt')
 					finalSongList.where('likes').gt(likes);							
-				else if(likesCondition == 'lt')
+				else if (likesCondition == 'lt')
 					finalSongList.where('likes').lt(likes);
-				else if(likesCondition == 'equals')
+				else if (likesCondition == 'equals')
 					finalSongList.where('likes').equals(likes);
 		}
 
-		if(popularity != undefined)
+		if (popularity != undefined)
 		{
 			var popCondition = popCondition || 'equals';
 
-				if(popCondition == 'gt')
+				if (popCondition == 'gt')
 					finalSongList.where('viewCount').gt(popularity);	
-				else if(popCondition == 'lt')
+				else if (popCondition == 'lt')
 					finalSongList.where('viewCount').lt(popularity);
-				else if(popCondition == 'equals')
+				else if (popCondition == 'equals')
 					finalSongList.where('viewCount').equals(popularity);
 		}
 
